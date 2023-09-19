@@ -5,6 +5,9 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include "dynamic_array.h"
+
+enum { buf_size = 256 };
 
 int lex(char *filename, int *ans)
 {
@@ -17,15 +20,19 @@ int lex(char *filename, int *ans)
 		exit(EXIT_FAILURE);
 	}
 
+	char buf[buf_size] = { 0 };
+	struct arr_t *arr = arr_create(20);
+	int count = 0;
 	while ((c = fgetc(f)) != EOF) {
-		char_count++;
-		if (c == '\n') {
-			str_count++;
+		if (c == ' ' || c == '\n' || c == '\t') {
+			arr_add(&arr, buf, count);
+			count = 0;
+		} else {
+			buf[count] = c;
+			count++;
 		}
 	}
-
-	ans[0] = char_count;
-	ans[1] = str_count;
+	arr_print(arr);
 
 	int close_ok = fclose(f);
 	if (close_ok == -1) {
