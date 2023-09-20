@@ -7,13 +7,13 @@
 #include <unistd.h>
 #include "dynamic_array.h"
 
-enum { buf_size = 256 };
+enum { buf_size = 256, start_size_arr = 20 };
 
-int lex(char *filename, int *ans)
+int lex(char *filename, struct arr_t *arr)
 {
 	FILE *f;
 	char c;
-	int str_count = 0, char_count = 0;
+	int ok;
 	f = fopen(filename, "r");
 	if (f == NULL) {
 		perror(filename); // "open is failed");	
@@ -21,11 +21,26 @@ int lex(char *filename, int *ans)
 	}
 
 	char buf[buf_size] = { 0 };
-	struct arr_t *arr = arr_create(20);
 	int count = 0;
 	while ((c = fgetc(f)) != EOF) {
 		if (c == ' ' || c == '\n' || c == '\t') {
-			arr_add(&arr, buf, count);
+			ok = arr_add(&arr, buf, count);
+			if (ok != 0) {
+				fprintf(stderr, "arr_add failed\n");
+				return -1;
+			}
+			count = 0;
+		} else if (c == '{' || c == '}' || c == '(' || c == ')' || c == ';') {
+			ok = arr_add(&arr, buf, count);
+			if (ok != 0) {
+				fprintf(stderr, "arr_add failed\n");
+				return -1;
+			}
+			ok = arr_add(&arr, &c, 1);
+			if (ok != 0) {
+				fprintf(stderr, "arr_add failed\n");
+				return -1;
+			}
 			count = 0;
 		} else {
 			buf[count] = c;
@@ -45,14 +60,12 @@ int lex(char *filename, int *ans)
 
 int main(int argc, char *argv[])
 {
-	int counts[2] = { 0 };
-
 	if (argc != 2) {
 		printf("incorrect command line arguments\n");
 		return 1;
 	}
-	lex(argv[1], counts);
-	printf("chars: %d\nlines: %d\n", counts[0], counts[1]);
+	struct arr_t *arr = arr_create(start_size_arr);
+	lex(argv[1], arr);
 	return 0;
 }
 

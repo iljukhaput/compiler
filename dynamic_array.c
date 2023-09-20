@@ -49,7 +49,14 @@ int arr_resize(struct arr_t **arr)
 
 int arr_add(struct arr_t **arr, char *str, size_t count)
 {
+	if (count == 0) {
+		return 0;
+	}
 	char *new_str = malloc(sizeof(char) * count);
+	if (new_str == NULL) {
+		perror("arr_add: ");
+		return -1;
+	}
 	for (int i = 0; i < count; i++) {
 		new_str[i] = str[i];
 	}
