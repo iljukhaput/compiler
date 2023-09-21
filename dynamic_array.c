@@ -3,8 +3,17 @@
 #include <stdint.h>
 #include "dynamic_array.h"
 
+char *str_token_id[] = { "open brace", "close brace", "open parenthesis",
+						 "close parenthesis", "semicolon", "int keyword",
+						 "return keyword", "identifier", "int literal" };
+
+struct token_t {
+	char *str;
+	enum token_id id;	
+};
+
 struct arr_t {
-	char **arr;
+	struct token_t *token;
 	size_t size;
 	size_t count;
 };
@@ -16,8 +25,8 @@ struct arr_t *arr_create(size_t size)
 		perror("arr_create: ");
 		return NULL;
 	}
-	arr->arr = malloc(sizeof(int32_t) * size);
-	if (arr->arr == NULL) {
+	arr->token = malloc(sizeof(struct token_t) * size);
+	if (arr->token == NULL) {
 		perror("arr_create: ");
 		return NULL;
 	}
@@ -30,7 +39,7 @@ int arr_resize(struct arr_t **arr)
 {
 	struct arr_t *new_arr = arr_create((*arr)->size * 2);
 	for (int i = 0; i < (*arr)->count; i++) {
-		new_arr->arr[i] = (*arr)->arr[i];
+		new_arr->token[i] = (*arr)->token[i];
 	}
 	new_arr->size = (*arr)->size * 2;
 	if (new_arr->size < (*arr)->size) {
@@ -39,15 +48,15 @@ int arr_resize(struct arr_t **arr)
 	}
 	new_arr->count = (*arr)->count;
 	for (int i = 0; i < (*arr)->count; i++) {
-		free((*arr)->arr[i]);
+		free((*arr)->token[i].str);
 	}
-	free((*arr)->arr);
+	free((*arr)->token);
 	free(*arr);
 	*arr = new_arr;
 	return 0;
 }
 
-int arr_add(struct arr_t **arr, char *str, size_t count)
+int arr_add(struct arr_t **arr, char *str, size_t count, enum token_id id)
 {
 	if (count == 0) {
 		return 0;
@@ -66,7 +75,13 @@ int arr_add(struct arr_t **arr, char *str, size_t count)
 			return -1;
 		}
 	}
-	(*arr)->arr[(*arr)->count] = new_str;
+	struct token_t *t = malloc(sizeof(struct token_t));
+	if (t == NULL) {
+		perror("arr_add: ");
+		return -1;
+	}
+	(*arr)->token[(*arr)->count].str = new_str;
+	(*arr)->token[(*arr)->count].id = id;
 	(*arr)->count++;
 	return 0;
 }
@@ -74,7 +89,7 @@ int arr_add(struct arr_t **arr, char *str, size_t count)
 void arr_print(struct arr_t *arr)
 {
 	for (int i = 0; i < arr->count; i++) {
-		printf("%s\n", arr->arr[i]);
+		printf("%d) %s - %s\n", i, arr->token[i].str, str_token_id[arr->token[i].id]);
 	}
 }
 
