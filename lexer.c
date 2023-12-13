@@ -17,6 +17,7 @@ enum token_id defining_token(const char *str)
 	} else if (strcmp(str, "return") == 0) {
 		return return_kw;
 	} else if (*str >= 'a' && *str <= 'z' || *str >= 'A' && *str <= 'Z' 
+			// TODO: add a loop to scan entire string
 			   || *str == '_') {
 		return identifier;
 	} else if (*str >= '0' && *str <= '9') {
@@ -109,31 +110,6 @@ int lex(char *filename, struct arr_t *arr)
 	size_t count = 0;
 	while ((c = fgetc(f)) != EOF) {
 		analyze_char(arr, buf, &count, c);
-		/*
-		if (c == ' ' || c == '\n' || c == '\t') {
-			ok = arr_add(&arr, buf, count);
-			if (ok != 0) {
-				fprintf(stderr, "arr_add failed\n");
-				return -1;
-			}
-			count = 0;
-		} else if (c == '{' || c == '}' || c == '(' || c == ')' || c == ';') {
-			ok = arr_add(&arr, buf, count);
-			if (ok != 0) {
-				fprintf(stderr, "arr_add failed\n");
-				return -1;
-			}
-			ok = arr_add(&arr, &c, 1);
-			if (ok != 0) {
-				fprintf(stderr, "arr_add failed\n");
-				return -1;
-			}
-			count = 0;
-		} else {
-			buf[count] = c;
-			count++;
-		}
-		*/
 	}
 	arr_print(arr);
 

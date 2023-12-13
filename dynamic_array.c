@@ -3,9 +3,10 @@
 #include <stdint.h>
 #include "dynamic_array.h"
 
-char *str_token_id[] = { "open brace", "close brace", "open parenthesis",
+char *str_token_id[] = { "error", "open brace", "close brace", "open parenthesis",
 						 "close parenthesis", "semicolon", "int keyword",
-						 "return keyword", "identifier", "int literal" };
+						 "return keyword", "identifier", "int literal", "punctuation mark",
+						 "word" };
 
 struct token_t {
 	char *str;
@@ -59,7 +60,7 @@ int arr_resize(struct arr_t **arr)
 int arr_add(struct arr_t **arr, char *str, size_t count, enum token_id id)
 {
 	if (count == 0) {
-		return 0;
+		return 1;
 	}
 	char *new_str = malloc(sizeof(char) * count);
 	if (new_str == NULL) {
@@ -86,30 +87,23 @@ int arr_add(struct arr_t **arr, char *str, size_t count, enum token_id id)
 	return 0;
 }
 
+enum token_id token_id(struct token_t *token)
+{
+	return token->id;
+}
+
+struct token_t *get_token(struct arr_t *arr, int num)
+{
+	if (num >= arr->size) {
+		return NULL;
+	}
+	return &arr->token[num];
+}
+
 void arr_print(struct arr_t *arr)
 {
 	for (int i = 0; i < arr->count; i++) {
 		printf("%d) %s - %s\n", i, arr->token[i].str, str_token_id[arr->token[i].id]);
 	}
 }
-
-/*
-int main()
-{
-	struct arr_t *array = arr_create(3);
-	printf("size: %zu\n", array->size);
-	char str[256];
-	scanf("%s", str);
-	arr_add(&array, str);
-	arr_add(&array, "123");
-	arr_add(&array, "123");
-	printf("size: %zu\n", array->size);
-	arr_add(&array, "444 ");
-	printf("size: %zu\n", array->size);
-	printf("1) %s\n", array->arr[0]);
-	printf("2) %s\n", array->arr[1]);
-	printf("3) %s\n", array->arr[2]);
-	printf("4) %s\n", array->arr[3]);
-}
-*/
 
